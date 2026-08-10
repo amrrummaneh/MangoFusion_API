@@ -7,6 +7,20 @@
 		<NoWarn>$(NoWarn);NU1903</NoWarn>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\carrot love.jpg" Link="wwwroot\images\carrot love.jpg" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\hakka noodles.jpg" Link="wwwroot\images\hakka noodles.jpg" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\idli.jpg" Link="wwwroot\images\idli.jpg" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\malai kofta.jpg" Link="wwwroot\images\malai kofta.jpg" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\mango_paradise.png" Link="wwwroot\images\mango_paradise.png" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\paneer pizza.jpg" Link="wwwroot\images\paneer pizza.jpg" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\paneer tikka.jpg" Link="wwwroot\images\paneer tikka.jpg" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\pani puri.jpg" Link="wwwroot\images\pani puri.jpg" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\rasmalai.jpg" Link="wwwroot\images\rasmalai.jpg" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\spring roll.jpg" Link="wwwroot\images\spring roll.jpg" />
+	  <Content Include="..\..\..\..\course_29\Course Snippets\Images\sweet rolls.jpg" Link="wwwroot\images\sweet rolls.jpg" />
+	</ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
