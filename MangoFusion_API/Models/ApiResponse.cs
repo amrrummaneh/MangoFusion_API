@@ -2,7 +2,7 @@
 
 namespace MangoFusion_API.Models
 {
-    public class API_Response
+    public class ApiResponse
     {
         public HttpStatusCode StatusCode { get; set; }
         public bool IsSuccess { get; set; } = true;
