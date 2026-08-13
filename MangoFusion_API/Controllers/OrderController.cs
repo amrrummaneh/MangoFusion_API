@@ -129,6 +129,13 @@ namespace MangoFusion_API.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    if (orderId != orderHeaderDTO.OrderHeaderId)
+                    {
+                        _response.IsSuccess = false;
+                        _response.StatusCode = HttpStatusCode.BadRequest;
+                        _response.ErrorMessages.Add("Invalid Id");
+                        return BadRequest(_response);
+                    }
                     OrderHeader? orderHeaderFromDb = _db.OrderHeaders.FirstOrDefault(u => u.OrderHeaderId == orderId);
 
                     if (orderHeaderFromDb == null)
