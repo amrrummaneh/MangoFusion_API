@@ -4,17 +4,19 @@ using MangoFusion_API.Models.Dto;
 using MangoFusion_API.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
 using System.Net;
 
 namespace MangoFusion_API.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
-    public class OrderController : Controller
+    public class OrderHeaderController : Controller
     {
         private readonly ApplicationDbContext _db;
         private readonly ApiResponse _response;
-        public OrderController(ApplicationDbContext db)
+        public OrderHeaderController(ApplicationDbContext db)
         {
             _db = db;
             _response = new ApiResponse();
@@ -63,6 +65,8 @@ namespace MangoFusion_API.Controllers
             _response.StatusCode = HttpStatusCode.OK;
             return Ok(_response);
         }
+
+
         [HttpPost]
         public ActionResult<ApiResponse> CreateOrder([FromBody] OrderHeaderCreateDTO orderHeaderDTO)
         {
@@ -136,6 +140,7 @@ namespace MangoFusion_API.Controllers
                         _response.ErrorMessages.Add("Invalid Id");
                         return BadRequest(_response);
                     }
+
                     OrderHeader? orderHeaderFromDb = _db.OrderHeaders.FirstOrDefault(u => u.OrderHeaderId == orderId);
 
                     if (orderHeaderFromDb == null)
