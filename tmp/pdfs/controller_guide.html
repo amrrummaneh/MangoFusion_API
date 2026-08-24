@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>The Comprehensive Guide to Controllers</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm 18mm 17mm; }
+  body { font-family: Tahoma, Arial, sans-serif; color: #000; background: #fff; font-size: 12pt; line-height: 1.85; }
+  h1 { font-size: 22pt; font-weight: 700; text-align: center; margin: 0 0 7mm; }
+  h2 { font-size: 16pt; font-weight: 700; margin: 9mm 0 3mm; page-break-after: avoid; }
+  h3 { font-size: 13.5pt; font-weight: 700; margin: 6mm 0 2mm; page-break-after: avoid; }
+  p { margin: 0 0 3.5mm; page-break-inside: avoid; }
+  ul, ol { margin: 0 0 4mm; padding-right: 7mm; }
+  li { margin-bottom: 1.5mm; }
+  code { direction: ltr; unicode-bidi: isolate; font-family: Consolas, "Courier New", monospace; font-size: 10pt; background: #fff; }
+  pre { direction: ltr; unicode-bidi: plaintext; text-align: left; white-space: pre-wrap; font-family: Consolas, "Courier New", monospace; font-size: 9.5pt; line-height: 1.45; border: 1px solid #000; padding: 4mm; margin: 3mm 0 4mm; page-break-inside: avoid; }
+  .term { direction: ltr; unicode-bidi: isolate; font-family: Consolas, "Courier New", monospace; }
+  .flow { direction: ltr; unicode-bidi: plaintext; text-align: left; font-family: Consolas, "Courier New", monospace; font-size: 10pt; border: 1px solid #000; padding: 4mm; margin: 3mm 0 4mm; page-break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; page-break-inside: avoid; }
+  th, td { border: 1px solid #000; padding: 2.5mm; vertical-align: top; }
+  th { font-weight: 700; }
+  .ltr { direction: ltr; unicode-bidi: isolate; }
+  .pagebreak { page-break-before: always; }
+</style>
+</head>
+<body>
+<h1><span class="ltr">The Comprehensive Guide to Controllers</span></h1>
+<p>هذا الدليل مرجع عام لفهم وبناء أي <code>Controller</code> ضمن مشاريع <code>ASP.NET Core Web API</code>. الأمثلة مبنية على الـ <code>Controllers</code> الموجودة في مشروعك، لكن الشرح يركّز أولاً على المفهوم العام ثم يربطه بأمثلة حقيقية.</p>
+
+<h2>1. دور ووظيفة الـ <code>Controller</code></h2>
+<p>الـ <code>Controller</code> هو نقطة الاستقبال المنظمة للطلبات القادمة من التطبيق الأمامي أو أدوات الاختبار. وظيفته ليست تنفيذ كل العمل بنفسه، بل تنظيم مسار الطلب: يحدد الـ <code>Action</code> المناسبة، يقرأ البيانات، يستدعي الجهة المسؤولة عن التنفيذ، ثم يعيد النتيجة بصيغة <code>JSON</code> مع حالة <code>HTTP</code> مناسبة.</p>
+<div class="flow">Client
+  → HTTP Request
+  → Controller Action
+  → DbContext or Service
+  → Database
+  → Controller
+  → JSON Response</div>
+<p>مثلاً، <code>MenuItemController</code> مسؤول عن التعامل مع عناصر الطعام: القراءة والإضافة والتعديل والحذف. أما <code>OrderHeaderController</code> فمسؤول عن الطلبات الرئيسية.</p>
+<h3>لماذا لا نضع منطق أعمال معقداً داخله؟</h3>
+<p>من الأفضل أن يبقى الـ <code>Controller</code> قصيراً وواضحاً. منطق مثل التحقق من صحة المعرّف، استدعاء قاعدة البيانات، أو إعادة <code>404 Not Found</code> مناسب داخله. أما حساب الخصومات والضرائب، فحص المخزون، الدفع، الإشعارات، وقواعد تغيير حالة الطلب، فيصبح أفضل داخل خدمة مثل <code>OrderService</code> عندما يكبر المشروع.</p>
+<div class="flow">Receive request
+→ validate data
+→ call service
+→ return response</div>
+
+<h2>2. الـ <code>Imports</code> أو <code>Using Statements</code></h2>
+<p>الـ <code>using</code> يسمح للملف باستخدام أنواع وكلاسات موجودة في أجزاء أخرى من المشروع أو في المكتبات.</p>
+<h3><code>Microsoft.AspNetCore.Mvc</code></h3>
+<pre>using Microsoft.AspNetCore.Mvc;</pre>
+<p>يوفر الأساسيات الخاصة بالـ <code>Web API</code> مثل <code>Controller</code> و<code>ControllerBase</code> و<code>[ApiController]</code> و<code>[Route]</code> و<code>[HttpGet]</code> والاستجابات مثل <code>Ok()</code> و<code>BadRequest()</code> و<code>NotFound()</code>.</p>
+<h3><code>MangoFusion_API.Data</code></h3>
+<pre>using MangoFusion_API.Data;</pre>
+<p>يحتاجه أي <code>Controller</code> يتعامل مع <code>ApplicationDbContext</code>. يظهر ذلك في <code>MenuItemController</code> و<code>OrderHeaderController</code> و<code>OrderDetailsController</code>.</p>
+<h3><code>MangoFusion_API.Models</code></h3>
+<pre>using MangoFusion_API.Models;</pre>
+<p>يوفر نماذج البيانات الرئيسية مثل <code>MenuItem</code> و<code>OrderHeader</code> و<code>OrderDetail</code> و<code>ApplicationUser</code> و<code>ApiResponse</code>.</p>
+<h3><code>MangoFusion_API.Models.Dto</code></h3>
+<pre>using MangoFusion_API.Models.Dto;</pre>
+<p>يوفر كائنات <code>DTO</code> المخصصة لشكل البيانات المتبادلة مع العميل، مثل <code>LoginRequestDTO</code> و<code>RegisterRequestDTO</code> و<code>MenuItemCreateDTO</code> و<code>OrderHeaderCreateDTO</code>. استخدام <code>DTO</code> يحدد بدقة ما يسمح للعميل بإرساله.</p>
+<h3><code>Microsoft.EntityFrameworkCore</code></h3>
+<pre>using Microsoft.EntityFrameworkCore;</pre>
+<p>تحتاجه عند استعمال مزايا <code>Entity Framework Core</code> مثل <code>Include()</code> و<code>ThenInclude()</code> و<code>FirstOrDefaultAsync()</code> و<code>SaveChangesAsync()</code>. في <code>OrderHeaderController</code> يستخدم لجلب الطلب مع تفاصيله وعناصر القائمة المرتبطة بها.</p>
+<h3><code>Identity</code> و<code>Authorization</code></h3>
+<pre>using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;</pre>
+<p>يستخدم <code>AuthController</code> خدمات <code>UserManager&lt;ApplicationUser&gt;</code> و<code>RoleManager&lt;IdentityRole&gt;</code> لإدارة المستخدمين والأدوار. ويستخدم <code>AuthTestController</code> السمة <code>[Authorize]</code> لحماية المسارات.</p>
+<h3><code>MangoFusion_API.Utility</code></h3>
+<pre>using MangoFusion_API.Utility;</pre>
+<p>يمنح الوصول إلى القيم المشتركة داخل <code>SD</code>، مثل أسماء الأدوار وحالات الطلب.</p>
+
+<h2>3. مفاهيم OOP المستخدمة</h2>
+<h3>الوراثة <code>Inheritance</code></h3>
+<p>الـ <code>Controller</code> يرث من كلاس جاهز يوفر قدرات الـ <code>Web API</code>. الصيغة الأنسب عادة لمشروع يعيد بيانات فقط هي:</p>
+<pre>public class ProductsController : ControllerBase</pre>
+<p>الكلاس <code>ControllerBase</code> يوفّر أدوات مثل <code>Ok()</code> و<code>BadRequest()</code> و<code>NotFound()</code>. في مشروعك الحالي، الـ <code>Controllers</code> ترث من <code>Controller</code>:</p>
+<pre>public class MenuItemController : Controller</pre>
+<p>الكلاس <code>Controller</code> يرث من <code>ControllerBase</code> ويضيف دعماً للصفحات. هذا يعمل بصورة صحيحة، لكن <code>ControllerBase</code> أوضح دلالياً إذا كان المشروع <code>API</code> فقط.</p>
+<p>مثال من مشروعك:</p>
+<pre>[ApiController]
+[Route("api/[controller]")]
+public class OrderHeaderController : Controller</pre>
+<h3>حقن الاعتماديات <code>Dependency Injection</code></h3>
+<p>بدلاً من أن ينشئ الـ <code>Controller</code> اتصال قاعدة البيانات أو الخدمات بنفسه، يستقبلها جاهزة في الـ <code>Constructor</code>.</p>
+<pre>public OrderHeaderController(ApplicationDbContext db)
+{
+    _db = db;
+}</pre>
+<p>هذا مثال حقيقي من <code>OrderHeaderController</code>. الإطار ينشئ <code>ApplicationDbContext</code> وفق الإعدادات ثم يمرره للـ <code>Controller</code>.</p>
+<p>ومثال أوسع من <code>AuthController</code>:</p>
+<pre>public AuthController(
+    UserManager&lt;ApplicationUser&gt; userManager,
+    RoleManager&lt;IdentityRole&gt; roleManager,
+    IConfiguration configuration)</pre>
+<p>هنا يطلب الـ <code>Controller</code> الخدمات المناسبة لوظيفته، بدلاً من التعامل مع المستخدمين وكلمات المرور وجداول الهوية يدوياً.</p>
+
+<h2>4. متى ننشئ <code>Controller</code> جديداً؟</h2>
+<p>أنشئ <code>Controller</code> جديداً عندما يظهر مورد جديد أو مسؤولية مستقلة في النظام.</p>
+<ul>
+<li><code>MenuItemController</code>: عناصر القائمة.</li>
+<li><code>OrderHeaderController</code>: الطلبات.</li>
+<li><code>OrderDetailsController</code>: تفاصيل الطلب.</li>
+<li><code>AuthController</code>: التسجيل وتسجيل الدخول.</li>
+</ul>
+<p>إذا أردت جلب عنصر واحد حسب المعرّف، أضف <code>Action</code> إلى <code>MenuItemController</code> لأنه يتعامل مع المورد نفسه. أما إن أضفت الدفع أو الكوبونات، فمن المنطقي إنشاء <code>PaymentController</code> أو <code>CouponController</code>.</p>
+<div class="flow">Same resource and responsibility?
+Yes → add an Action to the existing Controller
+No  → create a new Controller</div>
+
+<h2>5. المتغيرات الأساسية داخل الـ <code>Controller</code></h2>
+<h3><code>ApplicationDbContext</code></h3>
+<pre>private readonly ApplicationDbContext _db;</pre>
+<p>يوفر الوصول إلى البيانات عبر خصائص مثل <code>_db.MenuItems</code> و<code>_db.OrderHeaders</code> و<code>_db.OrderDetails</code>.</p>
+<h3>الخدمات <code>Services</code></h3>
+<p>قد يحتاج الـ <code>Controller</code> خدمات متخصصة. في مشروعك، يستخدم <code>AuthController</code> كلاً من <code>UserManager</code> و<code>RoleManager</code>. كما يحتاج <code>MenuItemController</code> إلى <code>IWebHostEnvironment</code> للتعامل مع مسار حفظ الصور.</p>
+<h3><code>ApiResponse</code></h3>
+<p>يستخدم مشروعك <code>ApiResponse</code> لتوحيد شكل الاستجابة: النتيجة، حالة النجاح، ورسائل الخطأ.</p>
+<h3>لماذا <code>private readonly</code>؟</h3>
+<p><code>private</code> يعني أن المتغير لا يستخدم خارج الـ <code>Controller</code>. و<code>readonly</code> يعني أن قيمته تعين مرة واحدة داخل الـ <code>Constructor</code> ولا تتغير بعد ذلك. هذا يجعل الاعتمادات ثابتة وواضحة.</p>
+
+<h2>6. خطوات بناء أي <code>Action</code></h2>
+<h3>1. تحديد المورد والعملية</h3>
+<p>اسأل: ما البيانات التي أتعامل معها؟ وماذا أريد أن أفعل بها؟ إذا كانت المهمة عرض عناصر الطعام، فالمورد هو <code>MenuItem</code> والمكان المناسب هو <code>MenuItemController</code>.</p>
+<h3>2. اختيار <code>HTTP Method</code></h3>
+<table>
+<tr><th>العملية</th><th>النوع</th><th>مثال من المشروع</th></tr>
+<tr><td>قراءة بيانات</td><td><code>GET</code></td><td>جلب عناصر القائمة أو الطلبات</td></tr>
+<tr><td>إنشاء مورد</td><td><code>POST</code></td><td>إنشاء طلب في <code>OrderHeaderController</code></td></tr>
+<tr><td>تعديل مورد</td><td><code>PUT</code></td><td>تعديل تقييم في <code>OrderDetailsController</code></td></tr>
+<tr><td>حذف مورد</td><td><code>DELETE</code></td><td>حذف عنصر في <code>MenuItemController</code></td></tr>
+</table>
+<h3>3. تصميم <code>Route</code></h3>
+<p>يجب أن يعبّر الرابط عن المورد بوضوح:</p>
+<pre>GET    /api/MenuItem
+GET    /api/MenuItem/5
+POST   /api/OrderHeader
+PUT    /api/OrderDetails/10</pre>
+<p>المعرّف يوضع عادة في الرابط، أما بيانات الإنشاء أو التعديل فتأتي في <code>Request Body</code>، أو في <code>Form</code> عند رفع ملف.</p>
+<h3>4. تحديد شكل البيانات الداخلة</h3>
+<p>استخدم <code>DTO</code> عندما تريد تحديد الحقول التي يسمح للعميل بإرسالها، مثل <code>LoginRequestDTO</code> و<code>OrderHeaderCreateDTO</code> و<code>MenuItemCreateDTO</code>.</p>
+<h3>5. التحقق من البيانات والصلاحيات</h3>
+<p>قبل العملية، تحقق من صحة البيانات، وجود المورد، وصلاحية المستخدم. إذا لم يوجد الطلب أو العنصر، أعد <code>404 Not Found</code> بدلاً من نجاح فارغ.</p>
+<h3>6. تنفيذ العملية</h3>
+<p>استخدم <code>ApplicationDbContext</code> لبيانات التطبيق، و<code>UserManager</code> للمستخدمين وكلمات المرور، و<code>RoleManager</code> للأدوار، و<code>Service</code> عندما يكبر منطق الأعمال.</p>
+<h3>7. اختيار <code>Return Type</code> ونتيجة <code>HTTP</code></h3>
+<p>غالباً ستعيد <code>IActionResult</code> أو <code>ActionResult&lt;ApiResponse&gt;</code>. النوع الأول يناسب الحالات التي يمكن أن تعيد فيها <code>Ok()</code> أو <code>NotFound()</code> أو <code>BadRequest()</code>. النوع الثاني ينسجم مع نمط <code>ApiResponse</code> في مشروعك.</p>
+<table>
+<tr><th>الحالة</th><th>الاستجابة</th></tr>
+<tr><td>قراءة أو تعديل ناجح</td><td><code>200 OK</code></td></tr>
+<tr><td>إنشاء مورد جديد</td><td><code>201 Created</code></td></tr>
+<tr><td>بيانات غير صالحة</td><td><code>400 Bad Request</code></td></tr>
+<tr><td>مستخدم غير مسجل أو توكن غير صالح</td><td><code>401 Unauthorized</code></td></tr>
+<tr><td>مستخدم بلا صلاحية</td><td><code>403 Forbidden</code></td></tr>
+<tr><td>مورد غير موجود</td><td><code>404 Not Found</code></td></tr>
+</table>
+<p>في <code>MenuItemController</code>، استخدام <code>CreatedAtRoute(...)</code> بعد إنشاء عنصر مثال جيد؛ فهو يعيد <code>201 Created</code> ويشير إلى رابط المورد الجديد.</p>
+<h3>قائمة فحص سريعة</h3>
+<div class="flow">1. What is the resource?
+2. What operation is needed?
+3. Which HTTP method fits?
+4. What route is clear?
+5. Is a DTO needed?
+6. Are authorization checks needed?
+7. Which DbContext or Service performs the work?
+8. Which HTTP status fits each outcome?</div>
+
+<h2>7. أخطاء شائعة وملاحظات من المشروع الحالي</h2>
+<h3>منطق أعمال كبير داخل الـ <code>Controller</code></h3>
+<p>في <code>OrderHeaderController</code> توجد عملية إنشاء الطلب ثم إنشاء تفاصيله وقواعد لتغيير الحالة. هذا مفهوم في حجم المشروع الحالي، لكن عند زيادة القواعد يفضّل نقلها إلى <code>OrderService</code>.</p>
+<h3>استخدام نموذج قاعدة البيانات مباشرة</h3>
+<p>استخدام <code>DTO</code> في مشروعك لعمليات الإنشاء والتعديل خطوة جيدة. لا تسمح للعميل بإرسال كائن كامل مثل <code>ApplicationUser</code> أو <code>OrderHeader</code> إذا كان يحتاج عدداً محدوداً من الخصائص فقط.</p>
+<h3>حماية البيانات المرتبطة بالمستخدم</h3>
+<p>يعرض <code>AuthTestController</code> مثالاً على <code>[Authorize]</code> وتقييد الدور. عند بناء عمليات لطلبات المستخدم، لا تعتمد على <code>userId</code> الذي يرسله العميل وحده؛ تحقق من هوية المستخدم الموجودة داخل <code>JWT</code> حتى لا يطلب مستخدم بيانات مستخدم آخر.</p>
+<h3>ترتيب <code>Middleware</code> للمصادقة</h3>
+<p>في ملف <code>Program.cs</code>، الترتيب المعتاد هو:</p>
+<pre>app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();</pre>
+<p>المصادقة تحدد هوية المستخدم أولاً، ثم التفويض يقرر هل يملك صلاحية الوصول.</p>
+<h3>المزج بين <code>async</code> والانتظار المتزامن</h3>
+<p>في <code>AuthController</code> يوجد استخدام مثل <code>.Result</code> أو <code>GetAwaiter().GetResult()</code> داخل عمليات غير متزامنة. عند كتابة عمليات جديدة، فضّل <code>await</code> مع عمليات قاعدة البيانات وخدمات الهوية.</p>
+<h3>التعامل مع الملفات المرفوعة</h3>
+<p>يتعامل <code>MenuItemController</code> مع صور العناصر. عند بناء عملية رفع ملفات، تحقق من النوع والحجم، ولا تثق باسم الملف القادم من العميل، واستخدم اسماً آمناً وفريداً عند الحفظ.</p>
+
+<h2>الخلاصة</h2>
+<p>الـ <code>Controller</code> الجيد لا يقاس بعدد الأسطر، بل بوضوح مسؤوليته:</p>
+<div class="flow">Understand the HTTP request
+→ validate data and authorization
+→ call the appropriate DbContext or Service
+→ return a clear HTTP response</div>
+<p>عند بناء أي <code>Action</code> جديدة، ابدأ بالمورد والمسؤولية، ثم حدد نوع الطلب والرابط والـ <code>DTO</code> والصلاحيات، وبعدها نفّذ العملية وأعد الاستجابة المناسبة.</p>
+</body>
+</html>
